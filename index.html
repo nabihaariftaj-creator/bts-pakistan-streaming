@@ -1,0 +1,111 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BTS Pakistan Streaming 🇵🇰</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#100a19;color:white;font-family:Arial,sans-serif}
+header{text-align:center;padding:35px 15px;background:#28163d}
+h1{color:#e4b7ff;font-size:32px}
+header p{color:#d8c6e9}
+main{max-width:900px;margin:25px auto;padding:15px}
+.card{background:#21152e;border:1px solid #63447c;border-radius:16px;padding:20px;margin-bottom:18px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.stat{text-align:center;background:#352044;padding:18px;border-radius:12px}
+.stat strong{display:block;font-size:26px;color:#e4b7ff;margin:8px}
+input,select{padding:12px;border-radius:8px;border:1px solid #80619a;background:#170f21;color:white;width:100%;margin:7px 0}
+button{padding:12px 18px;border:0;border-radius:8px;background:#c49aff;color:#20102e;font-weight:bold;cursor:pointer;margin-top:8px}
+table{width:100%;border-collapse:collapse;margin-top:15px}
+th,td{text-align:left;padding:12px 7px;border-bottom:1px solid #594268;font-size:13px}
+th{color:#dcbcff}
+.note{color:#c9b8d6;font-size:13px;line-height:1.6}
+a{color:#e4b7ff}
+@media(max-width:550px){.stats{grid-template-columns:1fr}h1{font-size:25px}}
+</style>
+</head>
+<body>
+<header>
+<h1>💜 BTS PAKISTAN 🇵🇰</h1>
+<p>ARMY SPOTIFY STREAMING TRACKER</p>
+<p>Every stream has a story.</p>
+</header>
+<main>
+<section class="card">
+<h2>Pakistan Streaming Dashboard</h2>
+<div class="stats">
+<div class="stat">Recorded streams<strong id="total">0</strong></div>
+<div class="stat">Songs tracked<strong id="songs">0</strong></div>
+<div class="stat">Records<strong id="entries">0</strong></div>
+</div>
+<p class="note">These totals include only chart records entered into this tracker, not all Spotify streams from Pakistan.</p>
+</section>
+
+<section class="card">
+<h2>🔎 Search BTS Songs</h2>
+<input id="search" placeholder="Search song or artist..." oninput="render()">
+<table>
+<thead><tr><th>Date</th><th>Song</th><th>Artist</th><th>Streams</th></tr></thead>
+<tbody id="list"></tbody>
+</table>
+</section>
+
+<section class="card">
+<h2>➕ Add Streaming Record</h2>
+<form id="form">
+<label>Date</label>
+<input type="date" id="date" required>
+<label>Song name</label>
+<input id="song" placeholder="e.g. Dynamite" required>
+<label>Artist</label>
+<input id="artist" placeholder="e.g. BTS / Jung Kook" required>
+<label>Daily Pakistan chart streams</label>
+<input id="streams" type="number" min="0" required>
+<button type="submit">Save Record 💜</button>
+</form>
+<button onclick="exportCSV()">Export Records</button>
+</section>
+
+<section class="card">
+<h2>📊 Pakistan Spotify Charts</h2>
+<p><a href="https://www.kworb.net/spotify/country/pk_daily.html" target="_blank">Pakistan Daily Spotify Chart</a></p>
+<p><a href="https://charts.spotify.com/" target="_blank">Spotify Charts</a></p>
+<p class="note">Unofficial fan-made project. Not affiliated with BTS, BIGHIT MUSIC or Spotify.</p>
+</section>
+</main>
+<script>
+let records=[];
+try{records=JSON.parse(localStorage.getItem("btsPKrecords")||"[]")}catch(e){}
+function render(){
+let q=document.getElementById("search").value.toLowerCase();
+let shown=records.filter(r=>(r.song+" "+r.artist).toLowerCase().includes(q));
+document.getElementById("total").textContent=shown.reduce((a,r)=>a+Number(r.streams),0).toLocaleString();
+document.getElementById("songs").textContent=new Set(shown.map(r=>r.song.toLowerCase())).size;
+document.getElementById("entries").textContent=shown.length;
+document.getElementById("list").innerHTML=shown.map(r=>`<tr><td>${r.date}</td><td>${safe(r.song)}</td><td>${safe(r.artist)}</td><td>${Number(r.streams).toLocaleString()}</td></tr>`).join("")||'<tr><td colspan="4">No records yet 💜</td></tr>';
+}
+function safe(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+document.getElementById("form").addEventListener("submit",function(e){
+e.preventDefault();
+records.push({
+date:document.getElementById("date").value,
+song:document.getElementById("song").value.trim(),
+artist:document.getElementById("artist").value.trim(),
+streams:Number(document.getElementById("streams").value)
+});
+localStorage.setItem("btsPKrecords",JSON.stringify(records));
+this.reset();render();
+});
+function exportCSV(){
+let rows=[["Date","Song","Artist","Streams"],...records.map(r=>[r.date,r.song,r.artist,r.streams])];
+let csv=rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(",")).join("\n");
+let a=document.createElement("a");
+a.href=URL.createObjectURL(new Blob([csv],{type:"text/csv"}));
+a.download="bts-pakistan-records.csv";a.click();
+}
+render();
+</script>
+</body>
+</html>
